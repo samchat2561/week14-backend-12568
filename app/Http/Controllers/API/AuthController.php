@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -32,5 +33,38 @@ class AuthController extends Controller
             'message' => 'User registered successfully!.',
             'user' => $user
         ], status: 201);
+    }
+
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Email and Password doe not match',
+                'errors' => ['Unauthorized']
+            ], 401);
+        }
+
+        $user = $request->user();
+        $user->tokens()->delete();
+        $token = $user->createToken('access_token', ['user'])->plainTextToken;
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User logged in successfully!',
+            'user_info'     => [
+                'id'    => $user->id,
+                'first_name'  => $user->first_name,
+                'last_name'  => $user->last_name,
+                'email' => $user->email,
+            ],
+            'token' => $token,
+            'token_type'  => 'Bearer',
+        ], 200);
     }
 }
