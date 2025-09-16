@@ -67,4 +67,23 @@ class AuthController extends Controller
             'token_type'  => 'Bearer',
         ], 200);
     }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        if ($user) {
+            $user->tokens()->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Successfully logged out',
+                'data' => []
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'User not authenticated',
+            'errors' => ['Unauthorized']
+        ], 401);
+    }
 }
