@@ -86,4 +86,22 @@ class AuthController extends Controller
             'errors' => ['Unauthorized']
         ], 401);
     }
+
+    public function profile(Request $request)
+    {
+        $user = $request->user();
+        if ($user) {
+            return response()->json([
+                'status' => true,
+                'message' => 'Profile Information',
+                'user' => $user
+            ],200);
+        }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'User not authenticated',
+            'errors' => 'Unauthorized'
+        ],401);
+    }
 }
